@@ -53,6 +53,7 @@ fab gn:devgeonode restart_geoshape
 fab gn:prodgeonode updatelayers_geoshape
 fab gn:prodgeonode importlayers_geoshape:~/data/*.zip
 fab gn:prodgeonode addgmail_geoshape:email,password
+fab gn:prodgeonode cron_restart_geoserver:'00 04 * * *'
 ```
 
 ## Contributing
