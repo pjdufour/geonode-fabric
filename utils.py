@@ -22,3 +22,10 @@ def _run_task(task, args):
                 task(* args)
     else:
         task(* args)
+
+
+def _cron_command(f, u, c, filename):
+    template = 'echo "{f} {u} {c}" > /etc/cron.d/{filename}'
+    cmd = template.format(f=f, u=u, c=c, filename=filename)
+    return cmd
+
