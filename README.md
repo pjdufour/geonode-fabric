@@ -1,4 +1,4 @@
-Geonode Fabric Script (geonode-fabric)
+GeoNode Fabric Script (geonode-fabric)
 ================
 
 ## Description
