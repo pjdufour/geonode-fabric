@@ -3,11 +3,41 @@ GeoNode Fabric Script (geonode-fabric)
 
 ## Description
 
-Fabric script for managing a GeoNode instance.
+Fabric script for managing multiple GeoNode instances, vanilla and GeoSHAPE variants.
 
 ## Installation
 
-TBD
+Follow directions at http://www.fabfile.org/installing.html to install fabric.  On Ubuntu you can most easily run, `sudo apt-get install fabric`.
+
+Create a `geonodes.py` file in the same directory as the `fabfile.py`.  `geonodes.py` is in `.gitignore` so will not be committed.  This file includes connection and other information, so that fab commands are streamlined.
+
+```javascript
+GEONODE_INSTANCES = {
+    "devgeonode": {
+        "ident":  "~/auth/keys/devgeonode.pem",
+        "host": "dev.geonode.example.com",
+        "user": "ubuntu",
+        "type": "geoshape"
+    },
+    "prodgeonode": {
+        "ident":  "~/auth/keys/prodgeonode.pem",
+        "host": "prod.geonode.example.com",
+        "user": "ubuntu",
+        "type": "geoshape"
+    }
+}
+```
+
+## Usage
+
+Cd into the main directory with the `fabfile.py`.  When you call fab, start with `gn:geonodehost` so that the host and identity key are loaded automatically from `geonodes.py`.  A few examples:
+
+```
+fab gn:devgeonode,prodgeonode lsb_release
+fab gn:devgeonode inspect_geoshape
+fab gn:devgeonode restart_geoshape
+fab gn:prodgeonode updatelayers_geoshape
+```
 
 ## Contributing
 
