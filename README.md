@@ -30,13 +30,28 @@ GEONODE_INSTANCES = {
 
 ## Usage
 
-Cd into the main directory with the `fabfile.py`.  When you call fab, start with `gn:geonodehost` so that the host and identity key are loaded automatically from `geonodes.py`.  A few examples:
+Cd into the main directory with the `fabfile.py`.  When you call fab, start with `gn:geonodehost` so that the host and identity key are loaded automatically from `geonodes.py`.
+
+To see a list of tasks run:
+
+```
+fab -l
+```
+
+To see the long description of a task run:
+
+```
+fab -d taskname
+```
+
+A few examples:
 
 ```
 fab gn:devgeonode,prodgeonode lsb_release
 fab gn:devgeonode inspect_geoshape
 fab gn:devgeonode restart_geoshape
 fab gn:prodgeonode updatelayers_geoshape
+fab gn:prodgeonode importlayers_geoshape:~/data/*.zip
 ```
 
 ## Contributing
