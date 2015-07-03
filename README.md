@@ -52,6 +52,7 @@ fab gn:devgeonode inspect_geoshape
 fab gn:devgeonode restart_geoshape
 fab gn:prodgeonode updatelayers_geoshape
 fab gn:prodgeonode importlayers_geoshape:~/data/*.zip
+fab gn:prodgeonode addgmail_geoshape:email,password
 ```
 
 ## Contributing
