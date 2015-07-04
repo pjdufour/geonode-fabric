@@ -6,7 +6,7 @@ from fabric.contrib.files import sed
 from subprocess import Popen, PIPE
 import datetime
 
-from utils import _build_env, _run_task, _cron_command
+from utils import _build_env, _run_task, _cron_command, _request_input, _request_continue, _append_to_file
 
 global targets
 targets = ()
@@ -17,6 +17,7 @@ PATH_MANAGEPY_GS = "/var/lib/geonode/rogue_geonode"
 
 PATH_DNA_JSON = "/opt/chef-run/dna.json"
 
+PATH_LS_VN = "/var/lib/geonode/local_settings.py"
 PATH_LS_GS = "/var/lib/geonode/rogue_geonode/geoshape/local_settings.py"
 
 #############################################################
@@ -110,17 +111,26 @@ def importlayers_geoshape(local):
 
 
 @task
-def addgmail_geoshape(username, password):
+def add_gmail(t=None, u=None, p=None):
     """
-    Adds server GMail to GeoSHAPE instance
+    Adds server GMail to instance
 
     Adds GMail settings to vim /var/lib/geonode/rogue_geonode/geoshape/local_settings.py
 
     """
 
-    address = username+'@gmail.com'
+    address = _request_input("User", u, True)+'@gmail.com'
     host = 'smtp.gmail.com'
-    return _run_task(_addemail_geoshape, args=[address, password, host])
+    return _run_task(_add_email, args=None, kwargs={'t':t, 'a':address, 'p':p, 'h':host})
+
+@task
+def add_analytics_ga(t=None, c=None):
+    return _run_task(_add_analytics_ga, args=None, kwargs={'t':t, 'c':c})
+
+
+@task
+def add_analytics_dap(t=None, a=None, sa=None):
+    return _run_task(_add_analytics_dap, args=None, kwargs={'t':t, 'a':a, 'sa':sa})
 
 
 #############################################################
@@ -215,16 +225,61 @@ def _provision_geoshape():
     sudo("cybergis-scripts-rogue.sh prod provision")
 
 
-def _addemail_geoshape(address, password, host):
-    data = None
-    with open ('templates/settings_email.py', "r") as f:
-        data = f.read()
-        data = data.replace("{{address}}", address)
-        data = data.replace("{{password}}", password)
-        data = data.replace("{{host}}", host)
+def _add_email(t=None, a=None, p=None, h=None):
 
-    sudo("echo '' >> {ls}".format(ls=PATH_LS_GS)) 
-    for line in data.split("\n"):
-        t = "echo '{line}' >> {ls}"
-        c = t.format(line=line.replace('"','\"'), ls=PATH_LS_GS)
-        sudo(c)
+    data = _load_template('settings_email.py')
+    if data:
+        t = _request_input("Type (vanilla/geoshape)", t, True)
+        a = _request_input("Address (e.g., john@gmail.com)", a, True)
+        p = _request_input("Password", p, True)
+        h = _request_input("Host (e.g., smtp.gmail.com)", h, True)
+
+        ls = PATH_LS_GS if t.lower()=="geoshape" else PATH_LS_VN
+        data = data.replace("{{address}}", a)
+        data = data.replace("{{password}}", p)
+        data = data.replace("{{host}}", h)
+
+        print "Local Settings: "+ls
+        print "Data..."
+        print data
+
+        if _request_continue():
+            _append_to_file(data.split("\n"), ls)
+
+
+def _add_analytics_dap(t=None, a=None, sa=None):
+
+    data = _load_template('settings_dap.py')
+    if data:
+        t = _request_input("Type (vanilla/geoshape)", t, True)
+        a = _request_input("Agency", a, True)
+        sa = _request_input("Sub-agency", sa, True)
+
+        ls = PATH_LS_GS if t.lower()=="geoshape" else PATH_LS_VN
+        data = data.replace("{{agency}}", a)
+        data = data.replace("{{subagency}}", sa)
+
+        print "Local Settings: "+ls
+        print "Data..."
+        print data
+
+        if _request_continue():
+            _append_to_file(data.split("\n"), ls)
+
+
+def _add_analytics_ga(t=None, c=None):
+
+    data = _load_template('settings_ga.py')
+    if data:
+        t = _request_input("Type (vanilla/geoshape)", t, True)
+        c = _request_input("Code", c, True)
+
+        ls = PATH_LS_GS if t.lower()=="geoshape" else PATH_LS_VN
+        data = data.replace("{{code}}", c)
+
+        print "Local Settings: "+ls
+        print "Data..."
+        print data
+
+        if _request_continue():
+            _append_to_file(data.split("\n"), ls)
