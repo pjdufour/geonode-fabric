@@ -54,6 +54,7 @@ fab gn:prodgeonode updatelayers_geoshape
 fab gn:prodgeonode importlayers_geoshape:~/data/*.zip
 fab gn:prodgeonode addgmail_geoshape:email,password
 fab gn:prodgeonode cron_restart_geoserver:'00 04 * * *'
+fab gn:prodgeonode backup_geonode:t=geoshape,remote=/opt/backups/20150707,local=~/backups
 ```
 
 ## Contributing

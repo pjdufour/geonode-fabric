@@ -47,18 +47,28 @@ def _cron_command(f, u, c, filename):
     return cmd
 
 
-def _load_template(filename)
+def _load_template(filename):
     data = None
     with open ('templates/'+filename, "r") as f:
         data = f.read()
     return data
 
 
-def _request_input(question, value, required):
+def _request_input(question, value, required, options=None):
     if value:
         return value
     else:
-        print question+":",
+
+        if options:
+            print question+" :"
+            print "* Options Below."+("  Enter to skip." if not required else "")
+            for opt in options:
+                print "| -- "+opt
+            print "* Select option:",
+        else:
+            print question+":",
+
+
         if required:
             value = None
             while not value:
@@ -66,9 +76,22 @@ def _request_input(question, value, required):
                 if not value:
                     print "Value required.  Please try again.  Ctrl+C to cancel."
                     print question+":",
+                elif options and (not value in options):
+                    print "Must select one of the options.  Ctrl+C to cancel."
+                    print question+":",
+                    value = None
             return value
+
         else:
-            return raw_input()
+            while not value:
+                value = raw_input()
+                if not value:
+                    return None
+                elif options and (not value in options):
+                    print "Must select one of the options.  Enter to skip.  Ctrl+C to cancel."
+                    print question+":",
+                    value = None
+            return value
 
 
 def _request_continue():
