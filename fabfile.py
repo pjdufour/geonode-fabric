@@ -8,7 +8,7 @@ import datetime
 
 from utils import _build_env, _run_task, _cron_command, _request_input, _request_continue, _append_to_file, _load_template
 
-from enumerations import GEONODE_TYPES
+from enumerations import GEONODE_TYPES, ISO_CATEGORIES
 
 global targets
 targets = ()
@@ -103,7 +103,7 @@ def updatelayers_geoshape(*args):
 
 
 @task 
-def importlayers(t=None, local=None, drop=None):
+def importlayers(t=None, local=None, drop=None, user=None, overwrite=None, category=None, keywords=None, private=None):
     """
     Import local files into a GeoNode instance
 
@@ -114,9 +114,15 @@ def importlayers(t=None, local=None, drop=None):
     t = GeoNode Type (Vanilla or GeoSHAPE)
     local = local file path
     drop = temporary drop folder
+
+    user = the user that will own the layer
+    overwrite = overwrite existing layers
+    category = ISO Category for layer
+    keywords = comma separated list of keywords
+    private = Is layer only visible to owner and admins?
     """
 
-    return _run_task(_importlayers, kwargs={'t':t, 'local':local, 'drop': drop})
+    return _run_task(_importlayers, kwargs={'t':t, 'local':local, 'drop': drop, 'user': user, 'overwrite': overwrite, 'category': category, 'keywords': keywords, 'private': private})
 
 
 @task
@@ -226,11 +232,17 @@ def _updatelayers(current_directory, activate):
         c = t.format(a=activate)
         sudo(c)
 
-def _importlayers(t=None, local=None, drop=None):
+def _importlayers(t=None, local=None, drop=None, user=None, overwrite=None, category=None, keywords=None, private=None):
 
     t = _request_input("Type (vanilla/geoshape)", t, True, options=GEONODE_TYPES)
     local = _request_input("Local File Path", local, True)
     drop = _request_input("Remote Drop Folder", drop, True)
+
+    user = _request_input("User", user, False)
+    overwrite = _request_input("Overwrite", overwrite, False)
+    category = _request_input("Category", category, False, options=ISO_CATEGORIES)
+    keywords = _request_input("Keywords (Comma-separated)", keywords, False)
+    private = _request_input("Private", private, True)
 
     path_managepy = PATH_MANAGEPY_GS if t.lower()=="geoshape" else PATH_MANAGEPY_VN
 
@@ -240,6 +252,16 @@ def _importlayers(t=None, local=None, drop=None):
         if remote_files:
             with cd(path_managepy):
                 template = "source {a}; python manage.py importlayers {paths}"
+                if user:
+                    template += " -u {u}".format(u=user)
+                if overwrite:
+                    template += " -o"
+                if category:
+                    template += " -c {c}".format(c=category)
+                if keywords:
+                    template += " -k {kw}".format(kw=keywords)
+                if private:
+                    template += " -p"
                 c = template.format(a=PATH_ACTIVATE, paths=(" ".join(remote_files)))
                 sudo(c)
         else:

@@ -50,8 +50,8 @@ A few examples:
 fab gn:devgeonode,prodgeonode lsb_release
 fab gn:devgeonode inspect_geoshape
 fab gn:devgeonode restart_geoshape
-fab gn:prodgeonode updatelayers_geoshape
-fab gn:prodgeonode importlayers_geoshape:~/data/*.zip
+fab gn:prodgeonode updatelayers:t=geoshape
+fab gn:prodgeonode importlayers:t=geoshape,local=~/data/*.zip,drop=/opt/drop,user=admin,overwrite=1,private=1
 fab gn:prodgeonode addgmail_geoshape:email,password
 fab gn:prodgeonode cron_restart_geoserver:'00 04 * * *'
 fab gn:prodgeonode backup_geonode:t=geoshape,remote=/opt/backups/20150707,local=~/backups
